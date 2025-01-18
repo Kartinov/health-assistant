@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface HealthScoreProps {
   score: number;
@@ -8,26 +10,51 @@ interface HealthScoreProps {
 }
 
 export function HealthScore({ score, ingredients }: HealthScoreProps) {
-  const getScoreColor = (score: number) => {
-    if (score <= 30) return 'bg-red-500';
-    if (score <= 70) return 'bg-yellow-500';
-    return 'bg-green-500';
+  const getScoreInfo = (score: number) => {
+    if (score <= 30) {
+      return {
+        label: 'Poor',
+        color: 'text-red-500 dark:text-red-400',
+        bgColor: 'bg-red-500 dark:bg-red-400',
+        icon: XCircle,
+        description: 'This product contains potentially harmful ingredients.'
+      };
+    }
+    if (score <= 70) {
+      return {
+        label: 'Moderate',
+        color: 'text-yellow-500 dark:text-yellow-400',
+        bgColor: 'bg-yellow-500 dark:bg-yellow-400',
+        icon: AlertTriangle,
+        description: 'This product contains some concerning ingredients.'
+      };
+    }
+    return {
+      label: 'Excellent',
+      color: 'text-green-500 dark:text-green-400',
+      bgColor: 'bg-green-500 dark:bg-green-400',
+      icon: CheckCircle2,
+      description: 'This product contains mostly healthy ingredients.'
+    };
   };
 
-  const getScoreText = (score: number) => {
-    if (score <= 30) return 'Poor';
-    if (score <= 70) return 'Moderate';
-    return 'Excellent';
-  };
+  const scoreInfo = getScoreInfo(score);
+  const Icon = scoreInfo.icon;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          Health Score
-          <span className={`text-white px-3 py-1 rounded-full text-sm ${getScoreColor(score)}`}>
-            {getScoreText(score)}
-          </span>
+          <div className="flex items-center gap-2">
+            <Icon className={cn("w-6 h-6", scoreInfo.color)} />
+            Health Score
+          </div>
+          <div className={cn(
+            "px-3 py-1 rounded-full text-sm font-medium text-white",
+            scoreInfo.bgColor
+          )}>
+            {scoreInfo.label}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -35,24 +62,34 @@ export function HealthScore({ score, ingredients }: HealthScoreProps) {
           <div>
             <div className="flex justify-between mb-2">
               <span className="text-sm font-medium">Score: {score}%</span>
+              <span className="text-sm text-muted-foreground">{scoreInfo.description}</span>
             </div>
             <Progress
               value={score}
               className="h-3"
-              indicatorClassName={getScoreColor(score)}
+              indicatorClassName={cn(
+                scoreInfo.bgColor,
+                "transition-all duration-500"
+              )}
             />
           </div>
 
-          <div>
-            <h4 className="text-sm font-medium mb-2">Ingredients:</h4>
-            <div className="bg-muted p-3 rounded-md">
-              <ul className="list-disc list-inside space-y-1">
-                {ingredients.map((ingredient, index) => (
-                  <li key={index} className="text-sm">
-                    {ingredient}
-                  </li>
-                ))}
-              </ul>
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium flex items-center gap-2">
+              Ingredients Analysis
+              <span className="text-muted-foreground font-normal">
+                ({ingredients.length} ingredients found)
+              </span>
+            </h4>
+            <div className="bg-muted/50 rounded-lg divide-y divide-border">
+              {ingredients.map((ingredient, index) => (
+                <div
+                  key={index}
+                  className="px-4 py-2 text-sm first:rounded-t-lg last:rounded-b-lg hover:bg-muted/80 transition-colors"
+                >
+                  {ingredient}
+                </div>
+              ))}
             </div>
           </div>
         </div>
